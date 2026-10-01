@@ -1,0 +1,18 @@
+# wet DELAY + loop TAPE, routing IN+LOOP, reverse tape, high feedback
+rate 48000
+seconds 6
+0 param wetMode 1
+0 param loopMode 1
+0 param routing 1
+0 param modWet 0.95
+0 param time 0.35
+0 fs wet down
+2 fs wet up
+500 fs loop down
+700 fs loop up
+800 param modLoop 0.1
+1000 param length 0.4
+1300 param clock 0.4
+1300 param smooth 1
+1700 param mix 0.9
+1800 param dryKill 1

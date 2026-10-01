@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mood Emulator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<!--BODY-->
+<main class="board">
+  <section class="pedal" aria-label="Pedal">
+    <div class="screw tl"></div><div class="screw tr"></div><div class="screw bl"></div><div class="screw br"></div>
+    <header class="brand">
+      <span class="wordmark">MOOD</span>
+      <span class="tagline">wet channel &middot; micro-looper &middot; emulator</span>
+    </header>
+
+    <div class="knob-row" id="row-top"></div>
+
+    <div class="toggle-row">
+      <div class="toggle" id="tg-wetMode" data-param="wetMode" data-labels="REVERB|DELAY|SLIP"></div>
+      <div class="toggle" id="tg-routing" data-param="routing" data-labels="IN|IN + LOOP|LOOP"></div>
+      <div class="toggle" id="tg-loopMode" data-param="loopMode" data-labels="ENV|TAPE|STRETCH"></div>
+    </div>
+
+    <div class="knob-row" id="row-bottom"></div>
+
+    <div class="channel-labels"><span>WET</span><span class="arrow">&larr; channels &rarr;</span><span>LOOP</span></div>
+
+    <div class="foot-row">
+      <div class="foot">
+        <span class="led led-wet" id="led-wet"></span>
+        <button class="footswitch" id="fs-wet" aria-label="Wet footswitch (key A)"><span>A</span></button>
+      </div>
+      <div class="foot">
+        <span class="led led-loop" id="led-loop"></span>
+        <button class="footswitch" id="fs-loop" aria-label="Loop footswitch (key L)"><span>L</span></button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="side">
+    <div class="lcd" aria-live="polite">
+      <div class="lcd-label" id="lcd-label">READY</div>
+      <div class="lcd-value" id="lcd-value">Press Start audio</div>
+      <div class="lcd-meta"><span id="lcd-clock">48.0 kHz</span><span id="lcd-loop">no loop</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>Input</h2>
+      <div class="seg" role="radiogroup" aria-label="Input source">
+        <button role="radio" aria-checked="true" data-src="demo" id="src-demo">Demo guitar</button>
+        <button role="radio" aria-checked="false" data-src="file" id="src-file">Audio file</button>
+        <button role="radio" aria-checked="false" data-src="live" id="src-live">Live input</button>
+      </div>
+      <input type="file" id="file-input" accept="audio/*" hidden>
+      <div class="row">
+        <button class="primary" id="btn-power">Start audio</button>
+        <label class="slider">Input <input type="range" id="in-gain" min="0" max="2" step="0.01" value="1"></label>
+      </div>
+      <div class="meters">
+        <div class="meter"><span>IN</span><div class="bar"><i id="m-in"></i></div></div>
+        <div class="meter"><span>OUT</span><div class="bar"><i id="m-out"></i></div></div>
+      </div>
+      <p class="hint" id="src-hint">A looping fingerpicked phrase, synthesized in your browser.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Loop buffer</h2>
+      <canvas id="loop-canvas" width="800" height="120" aria-label="Loop waveform"></canvas>
+      <p class="hint">Everything the looper caught. In TAPE mode the shaded area is the part LENGTH keeps.</p>
+    </div>
+
+    <div class="panel">
+      <h2>Dip switches</h2>
+      <div class="dips" id="dips"></div>
+      <label class="slider wide">Balance <span class="ends">wet</span><input type="range" id="balance" min="0" max="1" step="0.01" value="0.5"><span class="ends">loop</span></label>
+    </div>
+
+    <details class="panel help">
+      <summary>How to play it</summary>
+      <dl>
+        <dt>Wet switch (A)</dt><dd>Tap: wet channel on/off. Hold: freeze the reverb tail, delay repeats or slip slice. With LATCH on, a hold toggles freeze.</dd>
+        <dt>Loop switch (L)</dt><dd>The looper is always listening. Tap: loop what you just played. Hold from off: record a new loop until release. Hold while playing: overdub. Tap while playing: stop.</dd>
+        <dt>Clock</dt><dd>The sample rate of both channels, 2–64 kHz. The loop buffer is a fixed number of samples, so a lower clock means longer loops and delays, a darker, grittier sound, and a pitch drop for anything already recorded.</dd>
+        <dt>Loop modes</dt><dd>ENV: playing interrupts the loop and the current slice repeats until you stop (LENGTH = slice size, MODIFY = sensitivity). TAPE: LENGTH = loop length, MODIFY = speed and direction. STRETCH: LENGTH = slice size, MODIFY = stretch amount and direction, pitch unchanged.</dd>
+        <dt>Routing</dt><dd>What feeds the wet channel: your input, input plus the loop, or only the loop.</dd>
+        <dt>Knobs</dt><dd>Drag up/down, scroll, or use arrow keys. Double-click resets.</dd>
+      </dl>
+    </details>
+    <p class="disclaimer">Unofficial emulation for study and fun. Not affiliated with or endorsed by Chase Bliss.</p>
+  </aside>
+</main>
+<!--/BODY-->
+<script src="mood-worklet.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

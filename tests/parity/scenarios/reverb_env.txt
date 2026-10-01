@@ -1,0 +1,18 @@
+# wet REVERB + loop ENV, clock sweep, freeze, overdub
+rate 48000
+seconds 6
+0 param wetMode 0
+0 param loopMode 0
+0 param modWet 0.8
+0 param modLoop 0.85
+0 param length 0.3
+0 fs wet down
+2 fs wet up
+600 fs loop down
+602 fs loop up
+900 param clock 0.6
+1200 fs wet down
+1400 fs wet up
+1500 fs loop down
+1800 fs loop up
+1900 param spread 1
