@@ -180,7 +180,8 @@ installer and zip, and re-validates the plugin extracted from that zip.
 
 ## Releasing
 
-Push a tag `vX.Y.Z`. CI attaches `MoodEmu-X.Y.Z-windows-x64-setup.exe`,
+Push a tag `vX.Y.Z`, or run the **build** workflow manually (Actions → build → Run workflow)
+with `release_version` set to `X.Y.Z`, which creates the tag for you. CI attaches `MoodEmu-X.Y.Z-windows-x64-setup.exe`,
 `MoodEmu-windows-x64.zip` and `MoodEmu-macos.zip` to a GitHub release. See
 [docs/WINDOWS-INSTALL.md](docs/WINDOWS-INSTALL.md) for install help.
 
