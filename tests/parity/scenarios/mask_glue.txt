@@ -1,0 +1,19 @@
+# micro-looper MASK through its treatments; GLUE (warm and thrashed), DRY GLUE, EQ, volume
+rate 44100
+seconds 8
+0 param loopMode 2
+0 param modLoop 0.6
+0 param length 0
+900 fs loop down
+901 fs loop up
+1000 param length 0.3
+1200 param length 0.5
+1400 param length 0.75
+1600 param length 1
+1800 param glue 0.85
+1900 param dryGlue 1
+2000 param eq 0.15
+2200 param eq 0.85
+2300 param volume 0.8
+2500 param modLoop 0
+2600 param glue 0.3

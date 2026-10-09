@@ -1,0 +1,16 @@
+# wet SOUP: decay, character, freeze, spread, stepped clock change
+rate 48000
+seconds 6
+0 param wetMode 0
+0 param time 0.6
+0 param modWet 0.3
+0 param mix 0.7
+0 fs wet down
+1 fs wet up
+600 param clock 0.7
+800 param modWet 0.9
+1000 fs wet down
+1400 fs wet up
+1500 param spread 1
+1700 fs wet down
+1702 fs wet up

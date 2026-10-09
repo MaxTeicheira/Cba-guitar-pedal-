@@ -1,0 +1,16 @@
+# wet RELAY: 3 equal repeats, then infinite, freeze, ping-pong, wet synced to the looper
+rate 44100
+seconds 7
+0 param wetMode 1
+0 param modWet 0.3
+0 param time 0.4
+0 param mix 0.8
+0 fs wet down
+1 fs wet up
+700 param modWet 1
+1000 param spread 1
+1100 fs wet down
+1400 fs wet up
+1600 param sync 2
+1700 param time 0.7
+2000 param clock 0.55

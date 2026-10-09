@@ -1,0 +1,52 @@
+# stereo dry, MISO, hidden-option hold, true bypass, preset gesture, SYNC loop to wet,
+# bounce on CLOCK, ramp on TIME, TRAILS, DRY KILL, LATCH, knob shift, MIDI-style commands
+rate 48000
+seconds 9
+stereo 1
+0 param trails 1
+0 param sync 0
+0 param time 0.3
+0 fs wet down
+1 fs wet up
+200 fs loop down
+202 fs wet down
+500 fs wet up
+501 fs loop up
+600 fs wet down
+601 fs loop down
+602 fs wet up
+603 fs loop up
+640 fs wet down
+641 fs loop down
+642 fs wet up
+643 fs loop up
+680 fs wet down
+681 fs loop down
+682 fs wet up
+683 fs loop up
+900 fs wet down
+901 fs wet up
+1000 param miso 1
+1100 fs loop down
+1102 fs loop up
+1200 fs wet down
+1201 fs wet up
+1300 param rampClock 1
+1300 param bounce 1
+1300 param rampSpeed 0.9
+1500 param latch 1
+1500 fs wet down
+1700 fs wet up
+1800 fs loop down
+1810 fs loop shift
+1900 fs loop up
+2000 param rampClock 0
+2000 param rampTime 1
+2000 param sweep 1
+2000 cmd wet 0
+2100 cmd wet 1
+2200 cmd overdub 1
+2400 cmd overdub 0
+2500 param dryKill 1
+2600 cmd trueBypass 1
+2800 cmd trueBypass 0

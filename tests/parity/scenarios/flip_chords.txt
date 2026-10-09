@@ -1,0 +1,17 @@
+# wet FLIP: chords across MODIFY, lag, repeating chord freeze, spread, smooth clock
+rate 48000
+seconds 7
+0 param wetMode 2
+0 param modWet 0.03
+0 param time 0.0
+0 fs wet down
+1 fs wet up
+400 param modWet 0.4
+600 param time 0.45
+900 param modWet 0.9
+1100 fs wet down
+1500 fs wet up
+1600 param spread 1
+1700 param smooth 1
+1800 param clock 0.62
+2200 param modWet 0.2

@@ -1,0 +1,23 @@
+# micro-looper RADIO: all five stations, the interference between them, LENGTH per station
+rate 48000
+seconds 11
+0 param loopMode 1
+0 param modLoop 0
+0 param length 0.5
+1100 fs loop down
+1101 fs loop up
+1300 param length 0.15
+1500 param modLoop 0.13
+1650 param modLoop 0.252
+1700 param length 0.2
+1900 param modLoop 0.38
+2050 param modLoop 0.496
+2100 param length 0.8
+2300 param spread 1
+2450 param modLoop 0.65
+2600 param modLoop 0.764
+2650 param length 0.4
+2900 param modLoop 0.9
+3100 param modLoop 1
+3150 param length 0.7
+3600 param clock 0.6

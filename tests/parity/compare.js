@@ -1,5 +1,5 @@
 // Render every scenario with the JS reference and the C++ port and compare.
-//   node tests/parity/compare.js <path to mood_render executable>
+//   node tests/parity/compare.js <path to badmood_render executable>
 'use strict';
 const fs = require('fs');
 const os = require('os');
@@ -8,7 +8,7 @@ const { execFileSync } = require('child_process');
 
 const exe = process.argv[2];
 const dir = path.join(__dirname, 'scenarios');
-const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'mood-parity-'));
+const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'badmood-parity-'));
 let failed = 0;
 for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.txt')).sort()) {
   const sc = path.join(dir, f);

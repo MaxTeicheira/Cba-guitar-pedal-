@@ -1,0 +1,15 @@
+# micro-looper BURST: slices, scramble while playing, overdub with FADE, step size, HALF
+rate 48000
+seconds 8
+0 param loopMode 0
+0 param modLoop 0.85
+0 param length 0.4
+0 param fade 0.5
+1100 fs loop down
+1101 fs loop up
+1500 param length 0.9
+1900 fs loop down
+2300 fs loop up
+2500 param half 1
+2700 param spread 1
+2800 param modLoop 0.1

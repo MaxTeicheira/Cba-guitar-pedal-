@@ -1,0 +1,23 @@
+# ROUTING with both channels on, BLEND, CROSS from each source, BALANCE
+rate 48000
+seconds 9
+0 param wetMode 1
+0 param modWet 0.4
+0 param time 0.35
+0 param loopMode 1
+0 param modLoop 0.3
+1100 fs loop down
+1101 fs loop up
+1150 fs wet down
+1151 fs wet up
+1200 param routing 1
+1500 param routing 2
+1600 param blend 0.5
+1700 param cross 0.8
+1900 param inputMod 0
+2200 param inputMod 2
+2500 param wetMode 0
+2600 param balance 0.8
+2800 param routing 0
+2900 param inputMod 1
+3000 param wetMode 2
