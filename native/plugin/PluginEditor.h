@@ -4,10 +4,14 @@
 // Pedal-style front panel. Repaints are limited to the small regions that change
 // (LEDs, readout, meters, loop display): a full-window repaint at 30 Hz can starve
 // the UI thread on high-DPI screens.
-class MoodEditor final : public juce::AudioProcessorEditor, private juce::Timer {
+//
+// As on the pedal, the six knobs and three toggles take other jobs while footswitches
+// are held: both switches = Hidden Options; right switch + MIX = effect volume; with a
+// ramp dip on, MIX sets the ramp speed unless the left switch is held.
+class BadMoodEditor final : public juce::AudioProcessorEditor, private juce::Timer {
 public:
-    explicit MoodEditor(MoodProcessor&);
-    ~MoodEditor() override;
+    explicit BadMoodEditor(BadMoodProcessor&);
+    ~BadMoodEditor() override;
     void paint(juce::Graphics&) override;
     void resized() override;
     bool keyPressed(const juce::KeyPress&) override;
@@ -20,12 +24,13 @@ public:
         void drawToggleButton(juce::Graphics&, juce::ToggleButton&, bool, bool) override;
     };
     struct ThreeWay : juce::Component {
-        ThreeWay(juce::RangedAudioParameter& p, juce::StringArray labels, std::function<void()> onChange);
+        explicit ThreeWay(std::function<void()> onChange) : changed(std::move(onChange)) {}
+        void bind(juce::RangedAudioParameter& p, juce::StringArray labels);
         void paint(juce::Graphics&) override;
         void mouseDown(const juce::MouseEvent&) override;
-        juce::RangedAudioParameter& param;
+        juce::RangedAudioParameter* param = nullptr;
         juce::StringArray labels;
-        juce::ParameterAttachment attach;
+        std::unique_ptr<juce::ParameterAttachment> attach;
         int index = 0;
         std::function<void()> changed;
     };
@@ -40,10 +45,10 @@ public:
         bool isDown = false;
     };
     struct LoopView : juce::Component {
-        explicit LoopView(MoodProcessor& p) : proc(p) {}
+        explicit LoopView(BadMoodProcessor& p) : proc(p) {}
         void paint(juce::Graphics&) override;
-        MoodProcessor& proc;
-        std::array<float, MoodProcessor::kWaveBins> wave {};
+        BadMoodProcessor& proc;
+        std::array<float, BadMoodProcessor::kWaveBins> wave {};
         uint32_t version = 0;
     };
 
@@ -51,32 +56,41 @@ private:
     void timerCallback() override;
     void showReadout(const juce::String& label, const juce::String& value);
     void touch(const juce::String& id);
+    void rebind();
+    juce::String mainKnobId(int i) const;
+    static juce::String labelFor(const juce::String& id);
 
-    MoodProcessor& proc;
+    BadMoodProcessor& proc;
     KnobLook look;
 
-    struct Knob { juce::String id, label; std::unique_ptr<juce::Slider> slider; std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> att; };
-    std::vector<Knob> knobs;
-    std::unique_ptr<ThreeWay> wetMode, routing, loopMode;
+    struct Knob { juce::String id; std::unique_ptr<juce::Slider> slider; std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> att; };
+    std::vector<Knob> knobs;          // TIME MIX LENGTH / MODIFY CLOCK MODIFY (rebindable)
+    std::unique_ptr<ThreeWay> toggles[3], presetToggle;
+    bool togglesHidden = false;
     std::unique_ptr<Footswitch> fsWet, fsLoop;
     LoopView loopView;
 
     juce::ComboBox sourceBox;
     juce::TextButton loadButton { "Load file..." };
     juce::Slider inputGain;
-    juce::Slider balance;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> balanceAtt;
-    struct Dip { std::unique_ptr<juce::ToggleButton> button; std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> att; };
+    struct Dip { juce::String id; std::unique_ptr<juce::ToggleButton> button; std::unique_ptr<juce::AudioProcessorValueTreeState::ButtonAttachment> att; };
     std::vector<Dip> dips;
+    std::vector<Knob> hiddenKnobs;    // fixed bindings in the Hidden Options panel
+    struct Combo { std::unique_ptr<juce::ComboBox> box; std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> att; };
+    std::vector<Combo> hiddenCombos;
+    juce::TextButton save1 { "Save Preset 1" }, save2 { "Save Preset 2" }, resetHidden { "Reset hidden" };
     std::unique_ptr<juce::FileChooser> chooser;
 
-    juce::Rectangle<int> pedalArea, lcdArea, ledWet, ledLoop, meterArea;
+    juce::Rectangle<int> pedalArea, lcdArea, ledWet, ledMid, ledLoop, meterArea, dipArea, hiddenArea, presetArea;
     juce::String lcdLabel { "READY" }, lcdValue { "Tap L to loop, A for wet" }, lastTouched;
     juce::String lcdMeta;
     bool ledWetOn = false, ledLoopOn = false, blink = false;
-    uint32_t lastCycles = 0; double flashUntil = 0; int lastLoopLed = 0;
+    int ledMidState = 0;              // 0 off, 1 green, 2 red
+    juce::String boundKey;
+    uint32_t lastCycles = 0, lastSaved = 0; double flashUntil = 0, savedUntil = 0; int lastLoopLed = -1;
+    bool lastHidden = false, lastTb = false;
     float meterIn = 0, meterOut = 0;
     bool keyA = false, keyL = false;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MoodEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BadMoodEditor)
 };
