@@ -17,8 +17,8 @@ It ships in two forms built from the same DSP:
 
 The C++ core (`native/dsp/badmood.h`) is a line-for-line port of the JS reference
 (`src/badmood-worklet.js`). CI renders the same scenarios through both and requires them to
-match (`tests/parity/`). On Linux they are bit-identical; on macOS 6 of the 8 scenarios are
-bit-identical and the other two differ by one float ulp (libm rounding).
+match (`tests/parity/`: max |difference| < 1e-3 and SNR > 80 dB). Measured on macOS: 6 of the
+8 scenarios are bit-identical and the other two differ by one float ulp (libm rounding).
 
 **Not affiliated with or endorsed by Chase Bliss.** BAD MOOD is their trademark. The
 algorithms here are our own approximations, written from the public user manual and MIDI
