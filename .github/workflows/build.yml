@@ -29,29 +29,29 @@ jobs:
       matrix:
         os: [windows-latest, macos-latest]
     env:
-      ART: native/build/plugin/MoodEmu_artefacts/Release
+      ART: native/build/plugin/BadMoodEmu_artefacts/Release
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - name: Configure
         working-directory: native
-        run: cmake -B build -DMOOD_BUILD_PLUGIN=ON -DCMAKE_BUILD_TYPE=Release
+        run: cmake -B build -DBADMOOD_BUILD_PLUGIN=ON -DCMAKE_BUILD_TYPE=Release
       - name: Build
         working-directory: native
-        run: cmake --build build --config Release --parallel 4 --target dsp_tests mood_render MoodEmu_Standalone MoodEmu_VST3
+        run: cmake --build build --config Release --parallel 4 --target dsp_tests badmood_render BadMoodEmu_Standalone BadMoodEmu_VST3
       - name: DSP tests and JS/C++ parity
         shell: bash
         run: |
           if [ -x native/build/Release/dsp_tests.exe ]; then BIN=native/build/Release; EXT=.exe; else BIN=native/build; EXT=; fi
           "$BIN/dsp_tests$EXT"
-          node tests/parity/compare.js "$BIN/mood_render$EXT"
+          node tests/parity/compare.js "$BIN/badmood_render$EXT"
       - name: No dynamic MSVC runtime dependency (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          python tools/check_pe_imports.py $ART/VST3/MoodEmu.vst3/Contents/x86_64-win/MoodEmu.vst3 --list
-          python tools/check_pe_imports.py $ART/Standalone/MoodEmu.exe
+          python tools/check_pe_imports.py $ART/VST3/BadMoodEmu.vst3/Contents/x86_64-win/BadMoodEmu.vst3 --list
+          python tools/check_pe_imports.py $ART/Standalone/BadMoodEmu.exe
       - name: Validate VST3 with pluginval (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -61,7 +61,7 @@ jobs:
           Expand-Archive pluginval.zip -DestinationPath pluginval
           New-Item -ItemType Directory -Force pluginval-logs | Out-Null
           # --validate-in-process: otherwise pluginval forks and the exit code is lost
-          $a = "--strictness-level 8 --validate-in-process --timeout-ms 300000 --output-dir pluginval-logs --validate VST3/MoodEmu.vst3"
+          $a = "--strictness-level 8 --validate-in-process --timeout-ms 300000 --output-dir pluginval-logs --validate VST3/BadMoodEmu.vst3"
           $proc = Start-Process -FilePath "pluginval/pluginval.exe" -ArgumentList $a -Wait -PassThru -NoNewWindow -RedirectStandardOutput pluginval-stdout.txt
           Get-Content pluginval-stdout.txt | Select-Object -Last 40
           Copy-Item pluginval-stdout.txt pluginval-logs/
@@ -72,15 +72,15 @@ jobs:
         shell: pwsh
         working-directory: ${{ env.ART }}
         run: |
-          $p = Start-Process -FilePath "Standalone/MoodEmu.exe" -PassThru
+          $p = Start-Process -FilePath "Standalone/BadMoodEmu.exe" -PassThru
           Start-Sleep -Seconds 12
-          if ($p.HasExited) { Write-Error "MoodEmu.exe exited early with code $($p.ExitCode)"; exit 1 }
+          if ($p.HasExited) { Write-Error "BadMoodEmu.exe exited early with code $($p.ExitCode)"; exit 1 }
           Add-Type -AssemblyName System.Windows.Forms; Add-Type -AssemblyName System.Drawing
           $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
           $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
           $g = [System.Drawing.Graphics]::FromImage($bmp); $g.CopyFromScreen($b.Location, [System.Drawing.Point]::Empty, $b.Size)
-          $bmp.Save("$PWD/moodemu-windows-desktop.png", [System.Drawing.Imaging.ImageFormat]::Png)
-          "MoodEmu.exe alive after 12 s (pid $($p.Id)), window title: $($p.MainWindowTitle)" | Tee-Object -FilePath standalone-run.txt
+          $bmp.Save("$PWD/badmoodemu-windows-desktop.png", [System.Drawing.Imaging.ImageFormat]::Png)
+          "BadMoodEmu.exe alive after 12 s (pid $($p.Id)), window title: $($p.MainWindowTitle)" | Tee-Object -FilePath standalone-run.txt
           Stop-Process -Id $p.Id -Force
       - name: Build the Windows installer (Inno Setup)
         if: runner.os == 'Windows'
@@ -93,7 +93,7 @@ jobs:
           if (-not $ver) { $ver = (Get-Content VERSION -Raw).Trim() }
           $src = Resolve-Path $env:ART
           $repo = Resolve-Path .
-          & $iscc.FullName "/DMyAppVersion=$ver" "/DSrcDir=$src" "/DRepoDir=$repo" "/O$src" installer\moodemu.iss
+          & $iscc.FullName "/DMyAppVersion=$ver" "/DSrcDir=$src" "/DRepoDir=$repo" "/O$src" installer\badmoodemu.iss
           if ($LASTEXITCODE -ne 0) { Write-Error "Inno Setup failed ($LASTEXITCODE)"; exit 1 }
           Get-ChildItem "$src/*setup.exe" | ForEach-Object { "built: $($_.Name) ($([math]::Round($_.Length/1MB,1)) MB)" }
       - name: Package (Windows)
@@ -102,11 +102,11 @@ jobs:
         working-directory: ${{ env.ART }}
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
-          Copy-Item -Recurse VST3/MoodEmu.vst3 dist/
-          Copy-Item Standalone/MoodEmu.exe dist/
+          Copy-Item -Recurse VST3/BadMoodEmu.vst3 dist/
+          Copy-Item Standalone/BadMoodEmu.exe dist/
           Copy-Item ../../../../../LICENSE dist/
           Copy-Item ../../../../../docs/WINDOWS-INSTALL.md dist/README-FIRST.txt
-          Compress-Archive -Path dist/* -DestinationPath MoodEmu-windows-x64.zip -Force
+          Compress-Archive -Path dist/* -DestinationPath BadMoodEmu-windows-x64.zip -Force
       - name: Verify the shipped zip extracts and the extracted plugin loads
         if: runner.os == 'Windows'
         shell: pwsh
@@ -114,14 +114,14 @@ jobs:
         run: |
           # Extract as a user would, into a fresh folder, and validate THAT copy.
           Remove-Item -Recurse -Force ziptest -ErrorAction SilentlyContinue
-          Expand-Archive MoodEmu-windows-x64.zip -DestinationPath ziptest
-          $dll = "ziptest/MoodEmu.vst3/Contents/x86_64-win/MoodEmu.vst3"
-          foreach ($f in @($dll, "ziptest/MoodEmu.vst3/Contents/Resources/moduleinfo.json", "ziptest/README-FIRST.txt", "ziptest/MoodEmu.exe")) {
+          Expand-Archive BadMoodEmu-windows-x64.zip -DestinationPath ziptest
+          $dll = "ziptest/BadMoodEmu.vst3/Contents/x86_64-win/BadMoodEmu.vst3"
+          foreach ($f in @($dll, "ziptest/BadMoodEmu.vst3/Contents/Resources/moduleinfo.json", "ziptest/README-FIRST.txt", "ziptest/BadMoodEmu.exe")) {
             if (-not (Test-Path $f)) { Write-Error "missing from the extracted package: $f"; exit 1 }
           }
           python ../../../../../tools/check_pe_imports.py $dll
           if ($LASTEXITCODE -ne 0) { exit 1 }
-          $a = "--strictness-level 8 --validate-in-process --timeout-ms 300000 --validate ziptest/MoodEmu.vst3"
+          $a = "--strictness-level 8 --validate-in-process --timeout-ms 300000 --validate ziptest/BadMoodEmu.vst3"
           $pv = Start-Process -FilePath "pluginval/pluginval.exe" -ArgumentList $a -Wait -PassThru -NoNewWindow -RedirectStandardOutput ziptest-pluginval.txt
           Get-Content ziptest-pluginval.txt | Select-Object -Last 5
           if ($pv.ExitCode -ne 0) { Write-Error "the extracted copy failed pluginval ($($pv.ExitCode))"; exit 1 }
@@ -133,20 +133,20 @@ jobs:
           name: windows-validation
           path: |
             ${{ env.ART }}/pluginval-logs/**
-            ${{ env.ART }}/moodemu-windows-desktop.png
+            ${{ env.ART }}/badmoodemu-windows-desktop.png
             ${{ env.ART }}/standalone-run.txt
             ${{ env.ART }}/ziptest-pluginval.txt
       - name: Package (macOS)
         if: runner.os == 'macOS'
         working-directory: ${{ env.ART }}
         run: |
-          mkdir -p dist && cp -R Standalone/MoodEmu.app VST3/MoodEmu.vst3 dist/ && cp ../../../../../LICENSE dist/
-          ditto -c -k --keepParent dist MoodEmu-macos.zip
+          mkdir -p dist && cp -R Standalone/BadMoodEmu.app VST3/BadMoodEmu.vst3 dist/ && cp ../../../../../LICENSE dist/
+          ditto -c -k --keepParent dist BadMoodEmu-macos.zip
       - uses: actions/upload-artifact@v4
         with:
-          name: MoodEmu-${{ runner.os }}
+          name: BadMoodEmu-${{ runner.os }}
           path: |
-            ${{ env.ART }}/MoodEmu-*.zip
+            ${{ env.ART }}/BadMoodEmu-*.zip
             ${{ env.ART }}/*setup.exe
 
   # Publishes a GitHub release when: a v* tag is pushed, a manual run sets release_version,
@@ -191,6 +191,6 @@ jobs:
           tag_name: ${{ steps.ver.outputs.tag }}
           target_commitish: ${{ github.sha }}
           files: |
-            artifacts/**/MoodEmu-*.zip
+            artifacts/**/BadMoodEmu-*.zip
             artifacts/**/*setup.exe
           generate_release_notes: true

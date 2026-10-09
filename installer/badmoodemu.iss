@@ -1,5 +1,5 @@
-; Inno Setup script for the MoodEmu Windows package.
-; Built in CI: iscc /DMyAppVersion=x.y.z /DSrcDir=<artefacts Release dir> /DRepoDir=<repo root> installer\moodemu.iss
+; Inno Setup script for the BadMoodEmu Windows package.
+; Built in CI: iscc /DMyAppVersion=x.y.z /DSrcDir=<artefacts Release dir> /DRepoDir=<repo root> installer\badmoodemu.iss
 ;
 ; Installs the VST3 bundle into the shared VST3 folder so nobody has to drag anything into
 ; a DAW (dragging a .vst3 into a DAW window does not install it, and dragging out of
@@ -10,30 +10,30 @@
   #define MyAppVersion "0.0.0"
 #endif
 #ifndef SrcDir
-  #define SrcDir "..\native\build\plugin\MoodEmu_artefacts\Release"
+  #define SrcDir "..\native\build\plugin\BadMoodEmu_artefacts\Release"
 #endif
 #ifndef RepoDir
   #define RepoDir ".."
 #endif
 
 [Setup]
-AppId={{433495E8-894D-47BE-AD1E-CA21390A03A3}
-AppName=MoodEmu
+AppId={{06A8B10B-6230-4FF5-8CF1-ACCB30375773}
+AppName=BadMoodEmu
 AppVersion={#MyAppVersion}
 AppPublisher=cba-guitar-pedal (GPLv3)
 AppPublisherURL=https://github.com/maxteicheira/cba-guitar-pedal-
-DefaultDirName={autopf}\MoodEmu
-DefaultGroupName=MoodEmu
+DefaultDirName={autopf}\BadMoodEmu
+DefaultGroupName=BadMoodEmu
 DisableProgramGroupPage=yes
 LicenseFile={#RepoDir}\LICENSE
-OutputBaseFilename=MoodEmu-{#MyAppVersion}-windows-x64-setup
+OutputBaseFilename=BadMoodEmu-{#MyAppVersion}-windows-x64-setup
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 PrivilegesRequired=admin
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
-UninstallDisplayName=MoodEmu {#MyAppVersion}
+UninstallDisplayName=BadMoodEmu {#MyAppVersion}
 
 [Types]
 Name: "full"; Description: "VST3 plugin and standalone app"
@@ -46,19 +46,19 @@ Name: "standalone"; Description: "Standalone app (play the pedal without a DAW)"
 
 [Files]
 ; VST3 is a bundle (a folder), so the whole tree is copied.
-Source: "{#SrcDir}\VST3\MoodEmu.vst3\*"; DestDir: "{commoncf64}\VST3\MoodEmu.vst3"; \
+Source: "{#SrcDir}\VST3\BadMoodEmu.vst3\*"; DestDir: "{commoncf64}\VST3\BadMoodEmu.vst3"; \
     Components: vst3; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#SrcDir}\Standalone\MoodEmu.exe"; DestDir: "{app}"; Components: standalone; Flags: ignoreversion
+Source: "{#SrcDir}\Standalone\BadMoodEmu.exe"; DestDir: "{app}"; Components: standalone; Flags: ignoreversion
 Source: "{#RepoDir}\LICENSE"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#RepoDir}\docs\WINDOWS-INSTALL.md"; DestDir: "{app}"; DestName: "README.txt"; Flags: ignoreversion
 
 [Icons]
-Name: "{group}\MoodEmu"; Filename: "{app}\MoodEmu.exe"; Components: standalone
-Name: "{group}\MoodEmu read me"; Filename: "{app}\README.txt"
+Name: "{group}\BadMoodEmu"; Filename: "{app}\BadMoodEmu.exe"; Components: standalone
+Name: "{group}\BadMoodEmu read me"; Filename: "{app}\README.txt"
 
 [Run]
-Filename: "{app}\MoodEmu.exe"; Description: "Start MoodEmu now"; \
+Filename: "{app}\BadMoodEmu.exe"; Description: "Start BadMoodEmu now"; \
     Components: standalone; Flags: nowait postinstall skipifsilent
 
 [Messages]
-FinishedLabel=MoodEmu is installed.%n%nThe VST3 went into the shared VST3 folder. In your DAW, rescan plug-ins (Reaper: Options > Preferences > Plug-ins > VST > Re-scan) and MoodEmu will appear in the list. Do not drag the .vst3 into the DAW window: it is already installed.
+FinishedLabel=BadMoodEmu is installed.%n%nThe VST3 went into the shared VST3 folder. In your DAW, rescan plug-ins (Reaper: Options > Preferences > Plug-ins > VST > Re-scan) and BadMoodEmu will appear in the list. Do not drag the .vst3 into the DAW window: it is already installed.
