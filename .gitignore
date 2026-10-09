@@ -3,3 +3,5 @@ native/build/
 node_modules/
 *.f32
 .DS_Store
+build-plugin/
+build-*/
