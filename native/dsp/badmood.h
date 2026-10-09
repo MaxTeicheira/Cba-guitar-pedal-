@@ -66,6 +66,8 @@ constexpr int kFlipChordStart[48] = {0, 3, 6, 8, 11, 14, 16, 19, 22, 24, 27, 30,
 
 inline size_t uz(int i) { return static_cast<size_t>(i); }
 inline int ifloor(double x) { return static_cast<int>(std::floor(x)); }
+// JS truthiness of a number (non-zero and not NaN) without -Wfloat-equal.
+inline bool nz(double v) { return v < 0 || v > 0; }
 inline double clampd(double x, double a, double b) { return x < a ? a : x > b ? b : x; }
 inline int clampi(int x, int a, int b) { return x < a ? a : x > b ? b : x; }
 inline double expMap(double t, double a, double b) { return a * std::pow(b / a, t); }
@@ -668,13 +670,13 @@ public:
         }
         if (w == 0) {
             if (f.held) {
-                if (p.latch == 0) { freeze = false; if (f.momentary) wetOn = false; }
+                if (!nz(p.latch)) { freeze = false; if (f.momentary) wetOn = false; }
             } else {
                 wetOn = !wetOn;
                 if (!wetOn) freeze = false;
             }
         } else if (f.held) {
-            if (p.latch == 0) overdub = false;
+            if (!nz(p.latch)) overdub = false;
         } else if (!loopPlay) {
             engageLoop();
         } else {
@@ -690,14 +692,14 @@ public:
         const double aClock = 1 - std::exp(-1 / (0.06 * fs));
         updateSwitches();
 
-        const bool rampOn = p.rampTime != 0 || p.rampModWet != 0 || p.rampClock != 0 || p.rampModLoop != 0 || p.rampLength != 0;
+        const bool rampOn = nz(p.rampTime) || nz(p.rampModWet) || nz(p.rampClock) || nz(p.rampModLoop) || nz(p.rampLength);
         const bool engagedNow = wetOn || loopPlay;
         if (engagedNow && !lastEngaged) rampTrig = true;
         lastEngaged = engagedNow;
         rampShape = 1;
         if (rampOn) {
             const double inc = n / (expMap(p.rampSpeed, 20, 0.25) * fs);
-            if (p.bounce != 0) {
+            if (nz(p.bounce)) {
                 rampPh += inc; rampPh -= std::floor(rampPh);
                 rampShape = rampPh < 0.5 ? 2 * rampPh : 2 - 2 * rampPh;
             } else {
@@ -707,11 +709,11 @@ public:
             }
         }
         rampTrig = false;
-        const double tTime = p.rampTime != 0 ? rampValue(p.time) : p.time;
-        const double tModWet = p.rampModWet != 0 ? rampValue(p.modWet) : p.modWet;
-        const double tModLoop = p.rampModLoop != 0 ? rampValue(p.modLoop) : p.modLoop;
-        const double tLength = p.rampLength != 0 ? rampValue(p.length) : p.length;
-        const double tClockHz = clockHz(p.rampClock != 0 ? rampValue(p.clock) : p.clock, p.smooth != 0);
+        const double tTime = nz(p.rampTime) ? rampValue(p.time) : p.time;
+        const double tModWet = nz(p.rampModWet) ? rampValue(p.modWet) : p.modWet;
+        const double tModLoop = nz(p.rampModLoop) ? rampValue(p.modLoop) : p.modLoop;
+        const double tLength = nz(p.rampLength) ? rampValue(p.length) : p.length;
+        const double tClockHz = clockHz(nz(p.rampClock) ? rampValue(p.clock) : p.clock, nz(p.smooth));
 
         double pkIn = 0, pkOut = 0;
         for (int i = 0; i < n; ++i) {
@@ -755,8 +757,8 @@ public:
             }
 
             const double dL = inL ? static_cast<double>(inL[i]) : 0.0;
-            const double dR = p.miso != 0 ? dL : inR ? static_cast<double>(inR[i]) : dL;
-            const double mono = p.miso != 0 || !inR ? dL : 0.5 * (dL + dR);
+            const double dR = nz(p.miso) ? dL : inR ? static_cast<double>(inR[i]) : dL;
+            const double mono = nz(p.miso) || !inR ? dL : 0.5 * (dL + dR);
             const double ad = std::max(std::fabs(dL), std::fabs(dR)); if (ad > pkIn) pkIn = ad;
             const double xa = aa.run(mono);
             phase += clockRatio;
@@ -769,10 +771,10 @@ public:
 
             const double engagedT = wetOn || loopPlay ? 1.0 : 0.0;
             engaged += (engagedT - engaged) * 0.001;
-            const double dg = p.dryKill != 0 ? 0.0 : 1 - engaged * (1 - std::min(1.0, 2 * (1 - s.mix)));
+            const double dg = nz(p.dryKill) ? 0.0 : 1 - engaged * (1 - std::min(1.0, 2 * (1 - s.mix)));
             const double wg = std::min(1.0, 2 * s.mix);
             double l, r;
-            if (p.dryGlue != 0 && engaged > 1e-4) {
+            if (nz(p.dryGlue) && engaged > 1e-4) {
                 const double gl = glue(dL * dg + el * wg), gr = glue(dR * dg + er * wg);
                 const double ul = dL * dg + glue(el) * wg, ur = dR * dg + glue(er) * wg;
                 l = ul + (gl - ul) * engaged; r = ur + (gr - ur) * engaged;
@@ -901,9 +903,9 @@ private:
         Switch& f = sw[w];
         if (!f.held) return;
         if (w == 0) {
-            if (p.latch != 0) freeze = !freeze; else freeze = false;
+            if (nz(p.latch)) freeze = !freeze; else freeze = false;
             if (f.momentary) wetOn = false;
-        } else if (p.latch != 0) overdub = !overdub;
+        } else if (nz(p.latch)) overdub = !overdub;
         else overdub = false;
         f.held = false;
     }
@@ -928,10 +930,10 @@ private:
             f.held = true;
             if (w == 0) {
                 if (!wetOn) { wetOn = true; f.momentary = true; }
-                freeze = p.latch != 0 ? !freeze : true;
+                freeze = nz(p.latch) ? !freeze : true;
             } else {
                 if (!loopPlay) engageLoop();
-                overdub = p.latch != 0 ? !overdub : true;
+                overdub = nz(p.latch) ? !overdub : true;
             }
         }
         const Switch& a = sw[0];
@@ -1123,7 +1125,7 @@ private:
                 if (g & 1) { l += v * 0.5; r += v; } else { l += v; r += v * 0.5; }
             }
             sgLp += (y - sgLp) * 0.35;
-            const double k = y != 0 ? sgLp / y : 1;
+            const double k = nz(y) ? sgLp / y : 1;
             y = sgLp; l *= k; r *= k;
         } else {
             const int k = clampi(ifloor(len * 4 + 0.5), 0, 4);
@@ -1186,11 +1188,11 @@ private:
         const double thr = 0.25 * one * one;
         const double tgt = !off && maskEnv > thr ? 1 : 0;
         maskG += (tgt - maskG) * (tgt > maskG ? 0.02 : 0.002);
-        if (tgt == 0 && maskG < 1e-6) maskG = 0;
+        if (!nz(tgt) && maskG < 1e-6) maskG = 0;
         ringPh += kTau * 0.0075;
         if (ringPh > kTau) ringPh -= kTau;
         if (++crushCnt >= 6) { crushCnt = 0; crushV = std::floor(y0 * 12 + 0.5) / 12; }
-        if (maskG == 0) { so[0] = y0; so[1] = y0; return y0; }
+        if (!nz(maskG)) { so[0] = y0; so[1] = y0; return y0; }
         const double sel = s.length * 5;
         const int t0 = ifloor(sel); const double fr = sel - t0;
         double tr = maskTreat(t0, y0, mw) * (1 - fr);
@@ -1228,7 +1230,7 @@ private:
     }
 
     int loopLengthFor() const {
-        int n = p.half != 0 ? kLoopSamplesHalf : kLoopSamples;
+        int n = nz(p.half) ? kLoopSamplesHalf : kLoopSamples;
         if (p.sync == 0) {
             const int P = ifloor(4 * relayPeriod() + 0.5);
             if (P < n) n = P;
@@ -1247,8 +1249,8 @@ private:
     }
 
     void coreTick(double x) {
-        const bool spreadWet = p.spread != 0 && p.spreadSel != 2;
-        const bool spreadLoop = p.spread != 0 && p.spreadSel != 0;
+        const bool spreadWet = nz(p.spread) && p.spreadSel != 2;
+        const bool spreadLoop = nz(p.spread) && p.spreadSel != 0;
 
         const int Lnew = loopLengthFor();
         if (Lnew != L) {
@@ -1285,7 +1287,7 @@ private:
         const double wetSrc = x * xW + loopMono * lW;
         const bool tb = trueBypass;
         wetIn += ((wetOn && !tb ? 1.0 : 0.0) - wetIn) * 0.003;
-        wetOut += ((wetOn || p.trails != 0 ? 1.0 : 0.0) - wetOut) * 0.003;
+        wetOut += ((wetOn || nz(p.trails) ? 1.0 : 0.0) - wetOut) * 0.003;
         for (int k = 0; k < 3; ++k) modeGain[k] += ((p.wetMode == k ? 1.0 : 0.0) - modeGain[k]) * 0.002;
         const double wIn = wetSrc * wetIn;
         double wl = 0, wr = 0;
@@ -1371,12 +1373,12 @@ private:
         return y * gMake;
     }
 
-    double rampValue(double v) const { return p.sweep != 0 ? 1 - (1 - v) * rampShape : v * rampShape; }
+    double rampValue(double v) const { return nz(p.sweep) ? 1 - (1 - v) * rampShape : v * rampShape; }
 
     void snapSmoothers() {
         s.time = p.time; s.mix = p.mix; s.length = p.length; s.modWet = p.modWet; s.modLoop = p.modLoop;
         s.balance = p.balance; s.cross = p.cross; s.blend = p.blend; s.glue = p.glue; s.volume = p.volume; s.eq = p.eq;
-        s.clockHz = clockHz(p.clock, p.smooth != 0);
+        s.clockHz = clockHz(p.clock, nz(p.smooth));
         for (int k = 0; k < 3; ++k) { modeGain[k] = p.wetMode == k ? 1 : 0; lmGain[k] = p.loopMode == k ? 1 : 0; }
         lastLoopMode = p.loopMode;
     }
