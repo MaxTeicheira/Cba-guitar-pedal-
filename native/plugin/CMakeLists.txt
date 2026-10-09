@@ -5,7 +5,7 @@ FetchContent_Declare(juce GIT_REPOSITORY https://github.com/juce-framework/JUCE.
 FetchContent_MakeAvailable(juce)
 
 juce_add_plugin(BadMoodEmu
-  VERSION 0.1.0
+  VERSION 0.2.0
   COMPANY_NAME "cba-guitar-pedal"
   PLUGIN_MANUFACTURER_CODE Cbgp
   PLUGIN_CODE Bdme
